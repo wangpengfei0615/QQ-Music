@@ -5,6 +5,7 @@
 <script>
 import {getSingerList} from '../../API/singer'
 const hotName = '热门'
+const hotSingerLen = 10
 export default {
   data () {
     return {
@@ -18,7 +19,8 @@ export default {
     getSingerList () {
       getSingerList().then((res) => {
         this.singerList = res.data.list
-        console.log(this.singerList)
+        var finalList = this._nolmalSize(this.singerList)
+        console.log(finalList)
       })
     },
     _nolmalSize (list) {
@@ -28,10 +30,48 @@ export default {
           item: []
         }
       }
+      console.log(list, '123123')
       list.forEach((value, index) => {
-
+        if (index < hotSingerLen) {
+          console.log(value)
+          map.hot.item.push(
+            {
+              id: value.Fsinger_mid,
+              name: value.Fsinger_name,
+              avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${value.Fsinger_mid}.jpg?max_age=2592000`
+            }
+          )
+        }
+        const key = value.Findex
+        if (!map[key]) {
+          map[key] = {
+            title: key,
+            item: []
+          }
+        }
+        map[key].item.push({
+          id: value.Fsinger_mid,
+          name: value.Fsinger_name,
+          avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${value.Fsinger_mid}.jpg?max_age=2592000`
+        })
       })
-      console.log(map)
+      // 1
+      // 重排序
+      let ret = []
+      let hot = []
+      for (let key in map) {
+        let val = map[key]
+        if (val.title.match(/[a-zA-Z]/)) {
+          ret.push(val)
+        } else if (val.title === hotName) {
+          hot.push(val)
+        }
+      }
+      ret.sort((a, b) => {
+        return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+      })
+      return hot.concat(ret)
+      // 1
     }
   }
 }
