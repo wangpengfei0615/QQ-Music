@@ -34,7 +34,7 @@ export default {
     },
     interval: {
       type: Number,
-      default: 1000
+      default: 3000
     },
     threshold: {
       type: Number,
@@ -53,7 +53,7 @@ export default {
       if (this.autoPlay) {
         this._play()
       }
-    }, 20) // 浏览器刷新需要17ms，这里设置20ms是经验值
+    }, 20)
     window.addEventListener('resize', () => {
       if (!this.slider) {
         return
@@ -90,7 +90,6 @@ export default {
       }
       this.$refs.sliderGroup.style.width = width + 'px' // 设置sliderGroup容器的总宽度(所有轮播图宽度之和)
     },
-    // 初始化轮播图滚动(初始化better-scroll插件)
     _initSlider () {
       this.slider = new BScroll(this.$refs.slider, {
         scrollX: true,

@@ -1,6 +1,6 @@
 <template>
   <div class="recommend" ref="recommend">
-    <div class="recommend-content">
+    <Scroll class="recommend-content" :data="discList">
   <div>
     <div class="slider-wrapper" v-if="recommdend.length">
    <Silder>
@@ -11,36 +11,62 @@
      </div>
    </Silder>
     </div>
+
+      <div class="recommend-list">
+        <h1 class="list-title">热门歌单推荐</h1>
+        <ul>
+          <li v-for="(item, index) in discList" :key="index" class="item">
+            <div class="icon">
+            <img v-lazy="item.imgurl" alt="" width="60">
+            </div>
+            <div class="text">
+              <h2 class="name" v-html="item.creator.name"></h2>
+              <p class="desc" v-html="item.dissname"></p>
+            </div>
+          </li>
+        </ul>
+      </div>
   </div>
-    </div>
+    </Scroll>
   </div>
 </template>
 <script>
-import {getRecommend} from '../../API/recommend'
+import {getRecommend, getDiscList} from '../../API/recommend'
 import Silder from '../../base/silder/silder'
+import Scroll from '../../base/scroll/scroll'
+
 export default {
   data () {
     return {
-      recommdend: []
+      recommdend: [],
+      discList: []
     }
   },
   created () {
     this.getRecommend()
+    this.getDiscList()
   },
   methods: {
     getRecommend () {
       getRecommend().then((res) => {
         this.recommdend = res.data.slider
       })
+    },
+    getDiscList () {
+      getDiscList().then((res) => {
+        this.discList = res.data.list
+        console.log(this.discList)
+      })
     }
   },
   components: {
-    Silder
+    Silder,
+    Scroll
   }
 }
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus" type="text/stylus">
+<style lang="stylus" rel="stylesheet/stylus" type="text/stylus" >
   @import "~common/stylus/variable"
   .recommend
     position: fixed

@@ -5,8 +5,12 @@ import Vue from 'vue'
 import App from './App'
 import fastClick from 'fastclick'
 import router from './router'
+import vueLazy from 'vue-lazyload'
 import '@/common/stylus/index.styl'
 Vue.config.productionTip = false
+Vue.use(vueLazy, {
+  loading: require('./tupianjiazaizhong.png')
+})
 fastClick.attach(document.body)
 /* eslint-disable no-new */
 new Vue({

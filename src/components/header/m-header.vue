@@ -1,5 +1,6 @@
 <template>
   <div class="m-header">
+   <div class="icon"></div>
     <h1  class="text">QQ 音乐</h1>
   </div>
 </template>
@@ -19,11 +20,11 @@ export default {}
       display: inline-block
       vertical-align: top
       margin-top: 6px
-      width: 30px
-      height: 32px
+      width: 25px
+      height: 25px
       margin-right: 9px
-      bg-image('logo')
-      background-size: 30px 32px
+      background-image : url("QQ音乐.png")
+      background-size: cover
     .text
       display: inline-block
       vertical-align: top

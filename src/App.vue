@@ -2,7 +2,10 @@
   <div id="app">
     <Mheader></Mheader>
     <tab></tab>
-    <router-view></router-view>
+    <keep-alive>
+      <!--把DOM缓存在内存中-->
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
