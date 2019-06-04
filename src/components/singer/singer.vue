@@ -1,15 +1,22 @@
 <template>
-<div>歌手界面</div>
+  <div class="singer">
+  <list-view :data = 'finalList'></list-view>
+  </div>
 </template>
 
 <script>
 import {getSingerList} from '../../API/singer'
+import listView from '../../base/listView/listView'
 const hotName = '热门'
 const hotSingerLen = 10
 export default {
+  components: {
+    listView
+  },
   data () {
     return {
-      singerList: []
+      singerList: [],
+      finalList: []
     }
   },
   mounted () {
@@ -19,8 +26,8 @@ export default {
     getSingerList () {
       getSingerList().then((res) => {
         this.singerList = res.data.list
-        var finalList = this._nolmalSize(this.singerList)
-        console.log(finalList)
+        this.finalList = this._nolmalSize(this.singerList)
+        console.log(this.finalList, 'basdasdnajdfbia')
       })
     },
     _nolmalSize (list) {
@@ -77,6 +84,10 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="stylus" rel="stylesheet/stylus">
+  .singer
+    position: fixed
+    top: 88px
+    bottom: 0
+    width: 100%
 </style>
