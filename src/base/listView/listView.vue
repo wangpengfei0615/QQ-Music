@@ -1,5 +1,7 @@
 <template>
-<Scroll class="listview" :data = data>
+<Scroll class="listview" :data = data ref='listView' :listenScroll = 'listenScroll'
+@scroll="scroll"  :probe-type = 'probeType'
+>
   <ul>
     <li v-for="(group,index) in data" :key="index" class="list-group" ref="listGroup">
       <h2 class="list-group-title">{{group.title}}</h2>
@@ -11,12 +13,35 @@
       </uL>
     </li>
   </ul>
+  <div class="list-shortcut" @touchstart ='onShortcutTouchStart' @touchmove.stop.prevent = 'onShortMove' @touchend.stop>
+    <ul>
+      <li v-for="(item,index) in shortList" class="item" :key="index" :data-index = 'index'
+        :class= "{'current':currentIndex === index}">
+        {{item}}
+      </li>
+    </ul>
+  </div>
 </Scroll>
 </template>
 <script>
 import Scroll from '../../base/scroll/scroll'
+import {getindex} from '../../common/js/dom'
+const ANCHOR_HEIGHT = 18
 export default {
+  data () {
+    return {
+      scrollY: -1,
+      currentIndex: 0
+    }
+  },
   components: {Scroll},
+  created () {
+    this.listenScroll = true
+    this.listHeight = []
+    this.probeType = 3
+    this.touch = {}
+    this.diff = -1
+  },
   props: {
     data: {
       type: Array,
@@ -25,9 +50,84 @@ export default {
       }
     }
   },
+
+  computed: {
+    shortList () {
+      return this.data.map((group) => {
+        return group.title.substr(0, 1)
+      })
+    }
+  },
   methods: {
-    a () {
-      alert(1)
+    onShortcutTouchStart (e) {
+      let anchorIndex = getindex(e.target, 'index')
+      let firstTouch = e.touches[0]
+      this.touch.y1 = firstTouch.pageY
+      this.touch.anchorIndex = anchorIndex
+      this.$refs.listView.scrollToElement(this.$refs.listGroup[anchorIndex], 0)
+      this._scrollTo(anchorIndex)
+    },
+    onShortMove (e) {
+      let firstTouch = e.touches[0]
+      this.touch.y2 = firstTouch.pageY
+      let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0
+      let anchorIndex = parseInt(this.touch.anchorIndex) + delta
+      this._scrollTo(anchorIndex)
+    },
+    refresh () {
+      this.$refs.listView.refresh()
+    },
+    scroll (pos) {
+      this.scrollY = pos.y
+    },
+    _scrollTo (index) {
+      if (!index && index !== 0) {
+        return
+      }
+      if (index < 0) {
+        index = 0
+      } else if (index > this.listHeight.length - 2) {
+        index = this.listHeight.length - 2
+      }
+      this.$refs.listView.scrollToElement(this.$refs.listGroup[index], 0)
+      this.scrollY = this.$refs.listView.scroll.y
+    },
+    calHeight () {
+      this.listHeight = []
+      const list = this.$refs.listGroup
+      let height = 0
+      this.listHeight.push(height)
+      for (let i = 0; i < list.length; i++) {
+        let item = list[i]
+        height += item.clientHeight
+        this.listHeight.push(height)
+      }
+    }
+  },
+  watch: {
+    data () {
+      setTimeout(() => {
+        this.calHeight()
+      }, 20)
+    },
+    scrollY (newY) {
+      const listHeight = this.listHeight
+      // 当滚动到顶部，newY>0
+      if (newY > 0) {
+        this.currentIndex = 0
+        return
+      }
+      // 在中间部分滚动
+      for (let i = 0; i < listHeight.length - 1; i++) {
+        let height1 = listHeight[i]
+        let height2 = listHeight[i + 1]
+        if (-newY >= height1 && -newY < height2) {
+          this.currentIndex = i
+          this.diff = height2 + newY
+          return
+        }
+      }
+      this.currentIndex = listHeight.length - 2
     }
   },
   component: {

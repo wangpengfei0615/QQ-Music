@@ -6,6 +6,7 @@
 
 <script>
 import Bsccroll from 'better-scroll'
+const DIRECTION_V = 'vertical'
 export default {
   props: {
     probeType: {
@@ -14,11 +15,31 @@ export default {
     },
     click: {
       type: Boolean,
-      default: true
+      default: false
+    },
+    listenScroll: {
+      type: Boolean,
+      default: false
     },
     data: {
       type: Array,
       default: null
+    },
+    pullup: {
+      type: Boolean,
+      default: false
+    },
+    beforeScroll: {
+      type: Boolean,
+      default: false
+    },
+    refreshDelay: {
+      type: Number,
+      default: 20
+    },
+    direction: {
+      type: String,
+      default: DIRECTION_V
     }
   },
   mounted () {
@@ -35,13 +56,18 @@ export default {
         probeType: this.probeType,
         click: this.click
       })
+      if (this.listenScroll) {
+        this.scroll.on('scroll', (pos) => {
+          this.$emit('scroll', pos)
+        })
+      }
     },
-    // disable () {
-    //   this.scroll && this.scroll.disable()
-    // },
-    // enable () {
-    //   this.scroll && this.scroll.enable()
-    // },
+    scrollTo () {
+      this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
+    },
+    scrollToElement () {
+      this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
+    },
     refresh () {
       this.scroll && this.scroll.refresh()
     },
@@ -54,7 +80,6 @@ export default {
     }
   }
 }
-console.log(Bsccroll)
 </script>
 
 <style scoped lang="stylus" type="stylesheet/stylus">
