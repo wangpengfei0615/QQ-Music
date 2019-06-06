@@ -1,7 +1,7 @@
 <template>
 <div class="song-list">
   <ul>
-    <li v-for="(item,index) in songs" :key="index">
+    <li v-for="(item,index) in songs" :key="index" class="item">
       <div class="content">
         <h2 class="name">{{item.name}}</h2>
         <p class="desc">{{getDesc(item)}}</p>
@@ -33,15 +33,23 @@ export default {
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "~common/stylus/variable"
   @import "~common/stylus/mixin"
-  .content
-    flex: 1
-    line-height: 20px
-    overflow: hidden
-    .name
-      no-wrap()
-      color: $color-text
-    .desc
-      no-wrap()
-      margin-top: 4px
-      color: $color-text-d
+  .song-list
+    .item
+      display: flex
+      align-items: center
+      box-sizing: border-box
+      height: 64px
+      font-size: $font-size-medium
+      padding: 0 20px
+      .content
+        flex: 1
+        line-height: 20px
+        overflow: hidden
+        .name
+          no-wrap()
+          color: $color-text
+        .desc
+          no-wrap()
+          margin-top: 4px
+          color: $color-text-d
 </style>

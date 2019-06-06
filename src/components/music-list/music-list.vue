@@ -7,7 +7,7 @@
   <div class="bg-image" :style="bgStyle">
     <div class="filter"></div>
   </div>
-    <Scroll :data="songs">
+  <Scroll :data="songs">
       <div class="song-list-wrapper">
       <Songlist :songs="songs"></Songlist>
       </div>
