@@ -4,10 +4,10 @@
     <img class="icon-back" @click="a" src="../../assent/img/back.png">
   </div>
   <h1 class="title" v-html="title"></h1>
-  <div class="bg-image" :style="bgStyle">
+  <div class="bg-image" :style="bgStyle" ref="bgImg">
     <div class="filter"></div>
   </div>
-  <Scroll :data="songs">
+  <Scroll :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
       <Songlist :songs="songs"></Songlist>
       </div>
@@ -18,7 +18,6 @@
 <script>
 import Scroll from '../../base/scroll/scroll'
 import Songlist from '../../base/songList/songList'
-// import song from '../../API/song'
 export default {
   props: {
     bgImage: {
@@ -45,6 +44,9 @@ export default {
       console.log('返回')
       console.log(this.songs)
     }
+  },
+  mounted () {
+    this.$refs.list.$el.style.top = `${this.$refs.bgImg.clientHeight}px`
   },
   computed: {
     bgStyle () {
@@ -138,12 +140,8 @@ export default {
       top: 0
       bottom: 0
       width: 100%
+      overflow hidden
       background: $color-background
       .song-list-wrapper
         padding: 20px 30px
-      .loading-container
-        position: absolute
-        width: 100%
-        top: 50%
-        transform: translateY(-50%)
 </style>

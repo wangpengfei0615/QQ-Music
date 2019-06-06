@@ -40,7 +40,6 @@ export default {
       box-sizing: border-box
       height: 64px
       font-size: $font-size-medium
-      padding: 0 20px
       .content
         flex: 1
         line-height: 20px
