@@ -1,12 +1,14 @@
 <template>
   <div class="singer">
-  <list-view :data = 'finalList'></list-view>
+  <list-view :data = 'finalList' @select="selectSinger"></list-view>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 import {getSingerList} from '../../API/singer'
 import listView from '../../base/listView/listView'
+import {mapMutations} from 'vuex'
 const hotName = '热门'
 const hotSingerLen = 10
 export default {
@@ -23,11 +25,16 @@ export default {
     this.getSingerList()
   },
   methods: {
+    selectSinger (item) {
+      this.$router.push({
+        path: `/singer/${item.id}`
+      })
+      this.setSinger(item)
+    },
     getSingerList () {
       getSingerList().then((res) => {
         this.singerList = res.data.list
         this.finalList = this._nolmalSize(this.singerList)
-        console.log(this.finalList, 'basdasdnajdfbia')
       })
     },
     _nolmalSize (list) {
@@ -62,7 +69,6 @@ export default {
           avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${value.Fsinger_mid}.jpg?max_age=2592000`
         })
       })
-      // 1
       // 重排序
       let ret = []
       let hot = []
@@ -78,8 +84,10 @@ export default {
         return a.title.charCodeAt(0) - b.title.charCodeAt(0)
       })
       return hot.concat(ret)
-      // 1
-    }
+    },
+    ...mapMutations({
+      setSinger: 'SingerData'
+    })
   }
 }
 </script>

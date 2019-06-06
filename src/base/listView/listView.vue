@@ -1,12 +1,15 @@
 <template>
 <Scroll class="listview" :data = data ref='listView' :listenScroll = 'listenScroll'
-@scroll="scroll"  :probe-type = 'probeType'
->
+@scroll="scroll"  :probe-type = 'probeType' :click = true>
   <ul>
     <li v-for="(group,index) in data" :key="index" class="list-group" ref="listGroup">
       <h2 class="list-group-title">{{group.title}}</h2>
       <uL>
-        <li v-for="(item,index) in group.item" :key="index" class="list-group-item">
+        <li v-for="(item,index) in group.item"
+            :key="index"
+            class="list-group-item"
+            @click="selectIndex(item)"
+        >
           <img class="avatar" v-lazy="item.avatar">
           <span class="name">{{item.name}}</span>
         </li>
@@ -59,6 +62,9 @@ export default {
     }
   },
   methods: {
+    selectIndex (item) {
+      this.$emit('select', item)
+    },
     onShortcutTouchStart (e) {
       let anchorIndex = getindex(e.target, 'index')
       let firstTouch = e.touches[0]
@@ -112,12 +118,10 @@ export default {
     },
     scrollY (newY) {
       const listHeight = this.listHeight
-      // 当滚动到顶部，newY>0
       if (newY > 0) {
         this.currentIndex = 0
         return
       }
-      // 在中间部分滚动
       for (let i = 0; i < listHeight.length - 1; i++) {
         let height1 = listHeight[i]
         let height2 = listHeight[i + 1]
