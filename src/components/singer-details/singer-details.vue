@@ -65,7 +65,7 @@ export default {
     left 0
     right 0
   .slide-enter-active, .slide-leave-active
-    transition: all 0.5s
+    transition: all 0.2s
   .slide-enter, .slide-leave-to
     transform: translate3d(100%, 0, 0)
 </style>
