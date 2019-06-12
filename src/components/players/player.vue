@@ -18,25 +18,31 @@
          <div class="middle">
            <div class="middle-l">
              <div class="cd-wrapper" ref = 'cdWrapper'>
-               <div class="cd play">
+               <div class="cd" :class="cdState">
                  <img :src="currentSong.image" alt="" class="image">
                </div>
              </div>
            </div>
          </div>
          <div class="bottom">
+           <div class="progress-wrapper">
+             <span class="time time-l">{{format(currentTime)}}</span>
+             <div class="progress-bar-wrapper" ref="progressBtn"
+             ></div>
+             <span class="time time-r">{{format(currentSong.duration)}}</span>
+           </div>
            <div class="operators">
              <div class="icon i-left">
                <i class="icon-sequence"></i>
              </div>
              <div class="icon i-left">
-               <i  class="icon-prev"></i>
+               <i  @click="prev" class="icon-prev"></i>
              </div>
              <div class="icon i-center">
-               <i class="icon-play"></i>
+               <i :class="playIcon" @click="tooglePlaying"></i>
              </div>
              <div class="icon i-right">
-               <i class="icon-next"></i>
+               <i @click="next" class="icon-next"></i>
              </div>
              <div class="icon i-right">
                <i class="icon icon-not-favorite"></i>
@@ -47,22 +53,22 @@
       </transition>
       <transition name = 'mini'>
         <div class="mini-player" v-show="!fullScreen" @click="open">
-          <div class="icon" >
-             <img :src="currentSong.image" alt="" width="100%" height="100%" style="border-radius: 50%">
+          <div class="icon" :class="cdState">
+             <img  :src="currentSong.image" alt="" width="100%" height="100%" style="border-radius: 50%">
           </div>
           <div class="text">
             <div class="name" v-html="currentSong.name"></div>
             <div class="desc" v-html="currentSong.singer"></div>
           </div>
           <div class="control">
-            <i class="icon-play icon-play-mini"></i>
+            <i :class="miniIcon" @click.stop="tooglePlaying"></i>
           </div>
           <div class="control">
             <i class="icon-playlist"></i>
           </div>
         </div>
       </transition>
-      <audio :src="currentSong.url" autoplay="autoplay"></audio>
+      <audio :src="currentSong.url" ref="audio" @timeupdate="updateTime"></audio>
 
     </div>
 </template>
@@ -70,12 +76,41 @@
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 export default {
+  data () {
+    return {
+      currentTime: 0
+    }
+  },
   computed: {
+    playIcon () {
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
+    miniIcon () {
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    cdState () {
+      return this.playing ? 'play' : 'play-pause'
+    },
     ...mapGetters([
       'fullScreen',
       'playlist',
-      'currentSong'
+      'currentSong',
+      'playing',
+      'currentIndex'
     ])
+  },
+  watch: {
+    currentSong () {
+      this.$nextTick(() => {
+        this.$refs.audio.play()
+      })
+    },
+    playing (newState) {
+      const audio = this.$refs.audio
+      this.$nextTick(() => {
+        newState ? audio.play() : audio.pause()
+      })
+    }
   },
   methods: {
     back () {
@@ -137,15 +172,60 @@ export default {
       const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
       return {x, y, scale}
     },
+    prev () {
+      let index = this.currentIndex - 1
+      if (index === -1) {
+        index = this.playlist.length - 1
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.tooglePlaying()
+      }
+    },
+    next () {
+      let index = this.currentIndex + 1
+      if (index === this.playlist.length) {
+        index = 0
+      }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.tooglePlaying()
+      }
+    },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN'
-    })
+      setFullScreen: 'SET_FULL_SCREEN',
+      setPlaying: 'SET_PLAYING_STATE',
+      setCurrentIndex: 'SET_CURRENT_INDEX'
+    }),
+    tooglePlaying () {
+      console.log(this.playing)
+      this.setPlaying(!this.playing)
+    },
+    updateTime (e) {
+      this.currentTime = e.target.currentTime
+    },
+    format (interval) {
+      interval = interval | 0
+      const minute = interval / 60 | 0
+      const second = this._pad(interval % 60)
+      return `${minute}:${second}`
+    },
+    _pad (num, n = 2) {
+      let len = num.toString().length
+      while (len < n) {
+        num = '0' + num
+        len++
+      }
+      return num
+    },
   }
 }
 </script>
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "~common/stylus/variable"
   @import "~common/stylus/mixin"
+  .play
+    animation: rotate 20s linear infinite
   .player
     .normal-player
       position: fixed
@@ -216,7 +296,6 @@ export default {
               width: 100%
               height: 100%
               border-radius: 50%
-              animation: rotate 20s linear infinite
               .image
                 position: absolute
                 left: 0
@@ -226,7 +305,7 @@ export default {
                 box-sizing: border-box
                 border-radius: 50%
                 border: 10px solid rgba(255, 255, 255, 0.1)
-              .play
+              &.play
                 animation: rotate 20s linear infinite
           .playing-lyric-wrapper
             width: 80%
@@ -303,6 +382,7 @@ export default {
           .icon
             flex: 1
             color: $color-theme
+
             &.disable
               color: $color-theme-d
             i
