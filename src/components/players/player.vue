@@ -1,20 +1,25 @@
 <template>
     <div class="player"  v-show="playlist.length >0">
+      <transition name = 'normal'
+      @enter = 'enter' @leave = 'leave'
+      @after-enter = 'afterEnter' @after-leave = 'leaveEnter'
+      >
         <div class="normal-player" v-show="fullScreen" >
-       <div class="backgruond">
-         <img src="" alt="" width="100%" height="100%">
+       <div class="background">
+         <img :src="currentSong.image" alt=""  height="100%" width="100%">
+       </div>
          <div class="top">
-           <div class="back">
+           <div class="back" @click="back">
              <i class="icon-back"></i>
            </div>
-           <div class="title"></div>
-           <div class="subtitle"></div>
+           <div class="title" v-html="currentSong.name"></div>
+           <div class="subtitle" v-html="currentSong.singer"></div>
          </div>
          <div class="middle">
            <div class="middle-l">
-             <div class="cd-wrapper">
-               <div class="cd">
-                 <img src="" alt="" class="image">
+             <div class="cd-wrapper" ref = 'cdWrapper'>
+               <div class="cd play">
+                 <img :src="currentSong.image" alt="" class="image">
                </div>
              </div>
            </div>
@@ -39,25 +44,31 @@
            </div>
          </div>
        </div>
-        </div>
-        <div class="mini-player" v-show="!fullScreen">
-          <div class="icon">
-             <img src="" alt="">
+      </transition>
+      <transition name = 'mini'>
+        <div class="mini-player" v-show="!fullScreen" @click="open">
+          <div class="icon" >
+             <img :src="currentSong.image" alt="" width="100%" height="100%" style="border-radius: 50%">
           </div>
           <div class="text">
-            <div class="name"></div>
-            <div class="desc"></div>
+            <div class="name" v-html="currentSong.name"></div>
+            <div class="desc" v-html="currentSong.singer"></div>
           </div>
           <div class="control">
+            <i class="icon-play icon-play-mini"></i>
           </div>
           <div class="control">
             <i class="icon-playlist"></i>
           </div>
         </div>
+      </transition>
+      <audio :src="currentSong.url" autoplay="autoplay"></audio>
+
     </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import {mapGetters, mapMutations} from 'vuex'
+import animations from 'create-keyframe-animation'
 export default {
   computed: {
     ...mapGetters([
@@ -67,9 +78,68 @@ export default {
     ])
   },
   methods: {
-    a () {
-      console.log(this.fullScreen)
-    }
+    back () {
+      this.setFullScreen(false)
+    },
+    open () {
+      this.setFullScreen(true)
+      console.log(this.currentSong.url)
+    },
+    enter (el, done) {
+      const { x, y, scale } = this._getInit()
+      let animation = {
+        0: {
+          transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
+        },
+        60: {
+          transform: `translate3d(0,0,0) scale(1.1)`
+        },
+        100: {
+          transform: `translate3d(0,0,0) scale(1)`
+        }
+      }
+      animations.registerAnimation({
+        name: 'move',
+        animation,
+        presets: {
+          duration: 400,
+          easing: 'linear'
+        }
+      })
+      animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+    },
+    afterEnter () {
+      animations.unregisterAnimation('move')
+      this.$refs.cdWrapper.style.animation = ''
+    },
+    leave (el, done) {
+      this.$refs.cdWrapper.style.transition = 'all 0.4s'
+      const { x, y, scale } = this._getInit()
+      this.$refs.cdWrapper.style['transform'] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+      const timer = setTimeout(done, 400)
+      this.$refs.cdWrapper.addEventListener('transitionend', () => {
+        clearTimeout(timer)
+        done()
+      })
+    },
+    leaveEnter () {
+      this.$refs.cdWrapper.style.transition = ''
+      this.$refs.cdWrapper.style['transform'] = ''
+    },
+    _getInit () {
+      const targetWidth = 40
+      const paddingLeft = 40
+      const paddingBottom = 30
+      const paddingTop = 80
+      const width = window.innerWidth * 0.8
+      const scale = targetWidth / width
+      const x = -(window.innerWidth / 2 - paddingLeft)
+      const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
+      return {x, y, scale}
+    },
+    ...mapMutations({
+      setFullScreen: 'SET_FULL_SCREEN'
+    })
   }
 }
 </script>
@@ -92,7 +162,7 @@ export default {
         width: 100%
         height: 100%
         z-index: -1
-        opacity: 0.6
+        opacity: 0.5
         filter: blur(20px)
       .top
         position: relative
@@ -146,6 +216,7 @@ export default {
               width: 100%
               height: 100%
               border-radius: 50%
+              animation: rotate 20s linear infinite
               .image
                 position: absolute
                 left: 0
