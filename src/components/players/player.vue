@@ -23,6 +23,15 @@
                </div>
              </div>
            </div>
+           <scroll class="middle-r" ref="lyricList" :data = 'currentLyric && currentLyric.lines'>
+             <div class="lyric-wrapper">
+             <p ref="lyricLine" class="text" :class="{current :currentLine === index}" v-for=" (item , index) in currentLyric.lines" :key="index">
+               {{item.txt}}
+             </p>
+             </div>
+            <div>
+            </div>
+           </scroll>
          </div>
          <div class="bottom">
            <div class="progress-wrapper">
@@ -79,10 +88,15 @@ import animations from 'create-keyframe-animation'
 import ProgressBar from '../../base/process-bar/process-bar'
 import {playMode} from '../../common/js/config'
 import { shuffle } from '../../common/js/util'
+import Lyric from 'lyric-parser'
+import getLyric from '../../common/js/song'
+import Scroll from '../../base/scroll/scroll'
 export default {
   data () {
     return {
-      currentTime: 0
+      currentTime: 0,
+      currentLyric: [],
+      currentLine: 0
     }
   },
   computed: {
@@ -115,6 +129,7 @@ export default {
     currentSong () {
       this.$nextTick(() => {
         this.$refs.audio.play()
+        this.getLyric()
       })
     },
     playing (newState) {
@@ -125,10 +140,23 @@ export default {
     }
   },
   methods: {
+    getLyric () {
+      console.log(getLyric)
+      this.currentSong.getLyric().then((lyric) => {
+        this.currentLyric = new Lyric(lyric, this.handleLyric)
+        if (this.playing) {
+          this.currentLyric.play()
+        }
+        console.log(this.currentLyric)
+      })
+    },
+    handleLyric ({lineNum, txt}) {
+      this.currentLine = lineNum
+    },
     back () {
       this.setFullScreen(false)
     },
-    end() {
+    end () {
       this.next()
     },
     changeMode () {
@@ -274,7 +302,8 @@ export default {
     }
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    Scroll
   }
 }
 </script>
