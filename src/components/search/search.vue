@@ -1,33 +1,40 @@
 <template>
 <div class="search">
   <div class="search-box-wrapper">
-    <search-box></search-box>
+    <search-box ref="searchBox" @query ='queryChange'></search-box>
   </div>
-  <div class="shortcut-wrapper">
+  <div class="shortcut-wrapper" v-show="!query">
     <div class="shortcut">
     <div class="hot-key">
       <h1 class="title">热门搜索</h1>
       <ul>
-        <li class="item" v-for="(item,index) in hotKey" :key="index">
+        <li class="item" v-for="(item,index) in hotKey" :key="index" @click="addQuery(item.k)">
           <span>{{item.k}}</span>
         </li>
       </ul>
     </div>
 </div>
 </div>
+  <div class="search-result" v-show="query">
+    <Suggest :query="query"></Suggest>
+  </div>
+  <router-view></router-view>
 </div>
 </template>
 
 <script>
 import SearchBox from '../../base/search-box/search-box'
 import { getHotKey } from '../../api/search'
+import Suggest from '../../base/suggest/suggest'
 export default {
   data () {
     return {
-      hotKey: []
+      hotKey: [],
+      query: ''
     }
   },
   components: {
+    Suggest,
     SearchBox
   },
   created () {
@@ -37,8 +44,13 @@ export default {
     _getHotKey () {
       getHotKey().then((res) => {
         this.hotKey = res.data.hotkey.slice(0, 10)
-        console.log(this.hotKey)
       })
+    },
+    addQuery (query) {
+      this.$refs.searchBox.setQuery(query)
+    },
+    queryChange (query) {
+      this.query = query
     }
   }
 }

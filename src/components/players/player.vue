@@ -4,7 +4,7 @@
       @enter = 'enter' @leave = 'leave'
       @after-enter = 'afterEnter' @after-leave = 'leaveEnter'
       >
-        <div class="normal-player" v-show="fullScreen" >
+        <div class="normal-player" v-show="fullScreen">
        <div class="background">
          <img :src="currentSong.image" alt=""  height="100%" width="100%">
        </div>
@@ -27,13 +27,15 @@
          <div class="bottom">
            <div class="progress-wrapper">
              <span class="time time-l">{{format(currentTime)}}</span>
-             <div class="progress-bar-wrapper" ref="progressBtn"
-             ></div>
+             <div class="progress-bar-wrapper" ref="progressBtn">
+               <progress-bar ref="progressBar" :percent="percent" @percentChange="onProgressBarChange"
+                             @percentChanging="onProgressBarChanging"></progress-bar>
+             </div>
              <span class="time time-r">{{format(currentSong.duration)}}</span>
            </div>
            <div class="operators">
-             <div class="icon i-left">
-               <i class="icon-sequence"></i>
+             <div class="icon i-left" @click="changeMode">
+               <i :class="iconMode"></i>
              </div>
              <div class="icon i-left">
                <i  @click="prev" class="icon-prev"></i>
@@ -68,13 +70,15 @@
           </div>
         </div>
       </transition>
-      <audio :src="currentSong.url" ref="audio" @timeupdate="updateTime"></audio>
-
+      <audio :src="currentSong.url" ref="audio" @timeupdate="updateTime" @ended="end"></audio>
     </div>
 </template>
 <script>
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
+import ProgressBar from '../../base/process-bar/process-bar'
+import {playMode} from '../../common/js/config'
+import { shuffle } from '../../common/js/util'
 export default {
   data () {
     return {
@@ -88,15 +92,23 @@ export default {
     miniIcon () {
       return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
     },
+    percent () {
+      return this.currentTime / this.currentSong.duration
+    },
     cdState () {
       return this.playing ? 'play' : 'play-pause'
+    },
+    iconMode () {
+      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
     },
     ...mapGetters([
       'fullScreen',
       'playlist',
       'currentSong',
       'playing',
-      'currentIndex'
+      'currentIndex',
+      'mode',
+      'sequenceList'
     ])
   },
   watch: {
@@ -115,6 +127,30 @@ export default {
   methods: {
     back () {
       this.setFullScreen(false)
+    },
+    end() {
+      this.next()
+    },
+    changeMode () {
+      const mode = (this.mode + 1) % 3
+      this.setPlayMode(mode)
+      let list = null
+      console.log(list)
+      if (mode === playMode.random) {
+        list = shuffle(this.sequenceList)
+      } else {
+        list = this.sequenceList
+      }
+      this.resetCurrentIndex(list)
+      this.setPlaylist(list)
+    },
+    resetCurrentIndex (list) {
+      let index = list.findIndex(
+        (item) => {
+          return item.id === this.currentSong.id
+        }
+      )
+      this.setCurrentIndex(index)
     },
     open () {
       this.setFullScreen(true)
@@ -195,7 +231,9 @@ export default {
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setPlaying: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX'
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlayMode: 'SET_PLAY_MODE',
+      setPlaylist: 'SET_PLAY_LIST'
     }),
     tooglePlaying () {
       console.log(this.playing)
@@ -218,6 +256,25 @@ export default {
       }
       return num
     },
+    onProgressBarChange (percent) {
+      const currentTime = this.currentSong.duration * percent
+      this.currentTime = this.$refs.audio.currentTime = currentTime
+      if (this.currentLyric) {
+        this.currentLyric.seek(currentTime * 1000)
+      }
+      if (!this.playing) {
+        this.togglePlaying()
+      }
+    },
+    onProgressBarChanging (percent) {
+      this.currentTime = this.currentSong.duration * percent
+      if (this.currentLyric) {
+        this.currentLyric.seek(this.currentTime * 1000)
+      }
+    }
+  },
+  components: {
+    ProgressBar
   }
 }
 </script>
