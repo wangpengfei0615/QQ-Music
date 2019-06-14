@@ -20,6 +20,9 @@ const mutation = {
   },
   [types.SET_CURRENT_INDEX] (state, index) {
     state.currentIndex = index
+  },
+  [types.SET_DISC] (state, index) {
+    state.disc = index
   }
 }
 export default mutation

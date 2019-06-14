@@ -7,7 +7,7 @@
   <div class="bg-image" :style="bgStyle" ref="bgImg">
     <div class="play-wrapper">
       <div class="play" ref="playBtn">
-        <span class="text">随机播放全部</span>
+        <span class="text">全部歌曲</span>
       </div>
     </div>
   </div>

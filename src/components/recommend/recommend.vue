@@ -11,11 +11,10 @@
      </div>
    </Silder>
     </div>
-
       <div class="recommend-list">
         <h1 class="list-title">热门歌单推荐</h1>
         <ul>
-          <li v-for="(item, index) in discList" :key="index" class="item">
+          <li v-for="(item, index) in discList" :key="index" class="item" @click="selectItem(item)">
             <div class="icon">
             <img v-lazy="item.imgurl" alt="" width="60">
             </div>
@@ -28,13 +27,14 @@
       </div>
   </div>
     </Scroll>
+    <router-view></router-view>
   </div>
 </template>
 <script>
 import {getRecommend, getDiscList} from '../../API/recommend'
 import Silder from '../../base/silder/silder'
 import Scroll from '../../base/scroll/scroll'
-
+import {mapMutations} from 'vuex'
 export default {
   data () {
     return {
@@ -52,12 +52,21 @@ export default {
         this.recommdend = res.data.slider
       })
     },
+    selectItem (item) {
+      this.$router.push({
+        path: `recommend/${item.dissid}`
+      })
+      this.setDisc(item)
+    },
     getDiscList () {
       getDiscList().then((res) => {
         this.discList = res.data.list
         console.log(this.discList)
       })
-    }
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   },
   components: {
     Silder,
