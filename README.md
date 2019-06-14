@@ -1,21 +1,6 @@
-  # vue-music
-
-> A Vue.js project
-
-## Build Setup
-
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+#QQmusic
+##技术栈：
+Vue,Vue-cli,stylus
+##实现:
+推荐页，歌手页面，歌手详情页，排行页面，排行详情页面，搜索页面，歌单页面，歌曲播放页面；
+以上页面全真实数据获取，从官方接口抓取；
