@@ -352,6 +352,9 @@ export default {
     tooglePlaying () {
       console.log(this.playing)
       this.setPlaying(!this.playing)
+      if (this.currentLyric) {
+        this.currentLyric.togglePlay()
+      }
     },
     updateTime (e) {
       this.currentTime = e.target.currentTime
@@ -375,9 +378,6 @@ export default {
       this.currentTime = this.$refs.audio.currentTime = currentTime
       if (this.currentLyric) {
         this.currentLyric.seek(currentTime * 1000)
-      }
-      if (!this.playing) {
-        this.togglePlaying()
       }
     },
     onProgressBarChanging (percent) {
