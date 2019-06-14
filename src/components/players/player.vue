@@ -167,7 +167,7 @@ export default {
     },
     middleTouchStart (e) {
       this.touch.initiated = true
-      // 用来判断是否是一次移动
+
       this.touch.moved = false
       const touch = e.touches[0]
       this.touch.startX = touch.pageX

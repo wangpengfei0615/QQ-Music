@@ -16,7 +16,7 @@
 import {search} from '../../API/search'
 import {filterSinger} from '../../common/js/song'
 import Scroll from '../../base/scroll/scroll'
-import { mapMutations } from 'vuex'
+import { mapMutations ,mapActions} from 'vuex'
 export default {
   props: {
     query: {
@@ -82,11 +82,16 @@ export default {
           path: `/search/001BLpXF2DyJe2`
         })
         this.setSinger(singer)
+      } else {
+        this.insertSong(item)
       }
     },
     ...mapMutations({
       setSinger: 'SingerData'
-    })
+    }),
+    ...mapActions([
+      'insertSong'
+    ])
   },
   components: {
     Scroll

@@ -1,5 +1,5 @@
 export const SingerData = 'SingerData'
-// 播放内核
+
 export const SET_PLAYING_STATE = 'SET_PLAYING_STATE'
 
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN'
